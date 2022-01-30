@@ -1,4 +1,5 @@
-import { questions } from '../questions.js'
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-app.js";
+import { getDatabase, ref, child, get, push } from "https://www.gstatic.com/firebasejs/9.6.5/firebase-database.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnOpenModal = document.querySelector('#btnOpenModal')
@@ -10,16 +11,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevButton = document.querySelector('#prev')
     const sendButton = document.querySelector('#send')
 
+    const firebaseConfig = {
+        apiKey: "AIzaSyDvfZmAu2EaYebGG5w21m6RO7dW50J1fdw",
+        authDomain: "testburger-a3ad1.firebaseapp.com",
+        databaseURL: "https://testburger-a3ad1-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "testburger-a3ad1",
+        storageBucket: "testburger-a3ad1.appspot.com",
+        messagingSenderId: "697422036004",
+        appId: "1:697422036004:web:ec9f6f8ddedfc4a3cfacb1",
+        measurementId: "G-0YJ06KNM1F"
+    };
+
+    initializeApp(firebaseConfig);
+
+    const getData = () => {
+        nextButton.classList.add('d-none')
+        prevButton.classList.add('d-none')
+
+        formAnswers.textContent = 'LOAD';
+
+        const dbRef = ref(getDatabase());
+        get(child(dbRef, `questions`))
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    playTest(snapshot.val())
+                } else {
+                    console.log("No data available");
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+    }
+
     btnOpenModal.addEventListener('click', () => {
         modalBlock.classList.add('d-block')
-        playTest();
+        getData();
     })
 
     closeModal.addEventListener('click', () => {
         modalBlock.classList.remove('d-block')
     })
 
-    const playTest = () => {
+    const playTest = (questions) => {
         const finalAnswers = []
 
         let numberQuestion = 0
@@ -109,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
             numberQuestion++;
             renderQuestions(numberQuestion)
 
-            console.log(finalAnswers)
+            const db = getDatabase();
+            push(ref(db, 'contant'), finalAnswers);
         })
     }
 })
